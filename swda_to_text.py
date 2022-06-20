@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(dir=archive_dir) as tmp_dir:
 
         # If only saving utterances use different directory
         if utterance_only_flag:
-            set_dir = os.path.join(data_dir, set_dir + '_utt')
+            set_dir = os.path.join(data_dir, f'{set_dir}_utt')
         else:
             set_dir = os.path.join(data_dir, set_dir)
 

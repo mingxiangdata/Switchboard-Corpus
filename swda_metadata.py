@@ -3,9 +3,6 @@ from utilities import *
 # Initialise Spacy tokeniser
 tokeniser = nlp.data.SpacyTokenizer('en_core_web_sm')
 
-# Dictionary for metadata
-metadata = dict()
-
 # Processed data directory
 data_dir = 'swda_data'
 
@@ -24,8 +21,6 @@ for line in text:
 
 # Count total number of utterances
 num_utterances = len(utterances)
-metadata['num_utterances'] = num_utterances
-
 # Calculate max/mean utterance length in tokens
 max_utterance_len = 0
 mean_utterance_len = 0
@@ -36,7 +31,10 @@ for utt in utterances:
     tokenised_utterance = tokeniser(utt)
 
     # Remove whitespace tokens
-    tokenised_utterance = [token if not token.isspace() else '' for token in tokenised_utterance]
+    tokenised_utterance = [
+        '' if token.isspace() else token for token in tokenised_utterance
+    ]
+
 
     if len(tokenised_utterance) > max_utterance_len:
         max_utterance_len = len(tokenised_utterance)
@@ -47,8 +45,11 @@ for utt in utterances:
     mean_utterance_len += len(tokenised_utterance)
 
 assert num_utterances == len(tokenised_utterances)
-metadata['max_utterance_len'] = max_utterance_len
-metadata['mean_utterance_len'] = mean_utterance_len / num_utterances
+metadata = {
+    'num_utterances': num_utterances,
+    'max_utterance_len': max_utterance_len,
+    'mean_utterance_len': mean_utterance_len / num_utterances,
+}
 
 # Count each sets number of dialogues, max/mean dialogue length and number of utterances
 max_dialogue_len = 0
@@ -58,11 +59,14 @@ sets = ['train', 'test', 'val']
 for dataset_name in sets:
 
     # Load data set list
-    set_list = load_text_data(os.path.join(metadata_dir, dataset_name + '_split.txt'))
+    set_list = load_text_data(
+        os.path.join(metadata_dir, f'{dataset_name}_split.txt')
+    )
+
 
     # Count the number of dialogues in the set
     set_num_dialogues = len(set_list)
-    metadata[dataset_name + '_num_dialogues'] = set_num_dialogues
+    metadata[f'{dataset_name}_num_dialogues'] = set_num_dialogues
 
     # Count max number of utterances in sets dialogues
     set_max_dialogue_len = 0
@@ -71,7 +75,11 @@ for dataset_name in sets:
     for dialogue in set_list:
 
         # Load dialogues utterances
-        utterances = load_text_data(os.path.join(data_dir, dataset_name, dialogue + '.txt'), verbose=False)
+        utterances = load_text_data(
+            os.path.join(data_dir, dataset_name, f'{dialogue}.txt'),
+            verbose=False,
+        )
+
 
         # Count dialogue length for means/number of utterances
         num_dialogues += 1
@@ -86,9 +94,12 @@ for dataset_name in sets:
         if set_max_dialogue_len > max_dialogue_len:
             max_dialogue_len = set_max_dialogue_len
 
-    metadata[dataset_name + '_max_dialogue_len'] = set_max_dialogue_len
-    metadata[dataset_name + '_mean_dialogue_len'] = set_mean_dialogue_len / set_num_dialogues
-    metadata[dataset_name + '_num_utterances'] = set_num_utterances
+    metadata[f'{dataset_name}_max_dialogue_len'] = set_max_dialogue_len
+    metadata[f'{dataset_name}_mean_dialogue_len'] = (
+        set_mean_dialogue_len / set_num_dialogues
+    )
+
+    metadata[f'{dataset_name}_num_utterances'] = set_num_utterances
 
 metadata['num_dialogues'] = num_dialogues
 metadata['max_dialogue_len'] = max_dialogue_len
@@ -148,11 +159,27 @@ metadata_str = ["- Total number of utterances: " + str(metadata['num_utterances'
                 "- Number of speakers: " + str(metadata['num_speakers'])]
 
 for dataset_name in sets:
-    metadata_str.append(dataset_name.capitalize() + " set")
-    metadata_str.append("- Number of dialogues: " + str(metadata[dataset_name + '_num_dialogues']))
-    metadata_str.append("- Max dialogue length: " + str(metadata[dataset_name + '_max_dialogue_len']))
-    metadata_str.append("- Mean dialogue length: " + str(round(metadata[dataset_name + '_mean_dialogue_len'], 2)))
-    metadata_str.append("- Number of utterances: " + str(metadata[dataset_name + '_num_utterances']))
+    metadata_str.append(f"{dataset_name.capitalize()} set")
+    metadata_str.append(
+        "- Number of dialogues: "
+        + str(metadata[f'{dataset_name}_num_dialogues'])
+    )
+
+    metadata_str.append(
+        "- Max dialogue length: "
+        + str(metadata[f'{dataset_name}_max_dialogue_len'])
+    )
+
+    metadata_str.append(
+        "- Mean dialogue length: "
+        + str(round(metadata[f'{dataset_name}_mean_dialogue_len'], 2))
+    )
+
+    metadata_str.append(
+        "- Number of utterances: "
+        + str(metadata[f'{dataset_name}_num_utterances'])
+    )
+
 
 for string in metadata_str:
     print(string)
