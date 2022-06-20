@@ -69,7 +69,7 @@ class Metadata:
                         'from_caller_education', 'to_caller_education'):
                 d[key] = int(d[key])
             talk_day = d['talk_day']
-            talk_year = int('19' + talk_day[:2])
+            talk_year = int(f'19{talk_day[:2]}')
             talk_month = int(talk_day[2:4])
             talk_day = int(talk_day[4:])
             d['talk_day'] = datetime.datetime(
@@ -115,7 +115,7 @@ class CorpusReader:
             # Optional progress bar:
             if display_progress:
                 sys.stderr.write("\r")
-                sys.stderr.write("transcript %s" % i)
+                sys.stderr.write(f"transcript {i}")
                 sys.stderr.flush();
                 i += 1
             # Yield the Transcript instance:
@@ -137,7 +137,7 @@ class CorpusReader:
                 # Optional progress bar.
                 if display_progress:
                     sys.stderr.write("\r")
-                    sys.stderr.write("utterance %s" % i)
+                    sys.stderr.write(f"utterance {i}")
                     sys.stderr.flush();
                     i += 1
                 # Yield the Utterance instance:
@@ -169,10 +169,7 @@ class Transcript:
         """
         self.swda_filename = swda_filename
         # If the supplied value is a filename:
-        if isinstance(metadata, str) or isinstance(metadata, str):
-            self.metadata = Metadata(metadata)
-        else:  # Where the supplied value is already a Metadata object.
-            self.metadata = metadata
+        self.metadata = Metadata(metadata) if isinstance(metadata, str) else metadata
         # Get the file rows:
         rows = list(csv.reader(open(self.swda_filename, 'rt')))
         # Ge the header and remove it from the rows:
@@ -254,10 +251,7 @@ class Utterance:
                 else:
                     row_value = []
             elif att_name == "ptb_treenumbers":
-                if row_value:
-                    row_value = list(map(int, row_value.split("|||")))
-                else:
-                    row_value = []
+                row_value = list(map(int, row_value.split("|||"))) if row_value else []
             elif att_name == 'act_tag':
                 # I thought these conjoined tags were meant to be split.
                 # The docs suggest that they are single tags, thought,
@@ -276,9 +270,9 @@ class Utterance:
         # Caller data:
         for key in ('caller_sex', 'caller_education',
                     'caller_birth_year', 'caller_dialect_area'):
-            full_key = 'from_' + key
+            full_key = f'from_{key}'
             if self.caller.endswith("B"):
-                full_key = 'to_' + key
+                full_key = f'to_{key}'
             setattr(self, key, transcript_metadata[full_key])
 
     def damsl_act_tag(self):
@@ -327,10 +321,7 @@ class Utterance:
             return False
         tree_lems = self.regularize_tree_lemmas()
         pos_lems = self.regularize_pos_lemmas()
-        if pos_lems == tree_lems:
-            return True
-        else:
-            return False
+        return pos_lems == tree_lems
 
     def regularize_tree_lemmas(self):
         """

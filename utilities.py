@@ -52,7 +52,7 @@ def save_text_data(path, data, verbose=False):
         for i in range(len(data)):
             file.write(data[i] + "\n")
     if verbose:
-        print("Saved data to file %s." % path)
+        print(f"Saved data to file {path}.")
 
 
 def load_text_data(path, verbose=False):
@@ -60,7 +60,7 @@ def load_text_data(path, verbose=False):
         # Read a line and strip newline char
         lines = [line.rstrip('\r\n') for line in file.readlines()]
     if verbose:
-        print("Loaded data from file %s." % path)
+        print(f"Loaded data from file {path}.")
     return lines
 
 
@@ -68,7 +68,7 @@ def save_data_pickle(path, data, verbose=True):
     with open(path, "wb") as file:
         pickle.dump(data, file, protocol=2)
     if verbose:
-        print("Saved data to file %s." % path)
+        print(f"Saved data to file {path}.")
 
 
 def dialogue_to_file(path, dialogue, utterance_only, write_type):
@@ -87,9 +87,8 @@ def remove_file(data_dir, file, utterance_only):
     if utterance_only:
         if os.path.exists(os.path.join(data_dir, file + '_utt.txt')):
             os.remove(os.path.join(data_dir, file + '_utt.txt'))
-    else:
-        if os.path.exists(os.path.join(data_dir, file + '.txt')):
-            os.remove(os.path.join(data_dir, file + '.txt'))
+    elif os.path.exists(os.path.join(data_dir, file + '.txt')):
+        os.remove(os.path.join(data_dir, file + '.txt'))
 
 
 def save_word_frequency_distributions(data, metadata_dir, file_name):

@@ -8,8 +8,14 @@ class Dialogue:
         self.utterances = utterances
 
     def __str__(self):
-        return str("Conversation: " + self.conversation_id + "\n"
-                   + "Number of Utterances: " + str(self.num_utterances))
+        return str(
+            (
+                f"Conversation: {self.conversation_id}"
+                + "\n"
+                + "Number of Utterances: "
+            )
+            + str(self.num_utterances)
+        )
 
 
 class Utterance:
@@ -19,7 +25,7 @@ class Utterance:
         self.da_label = da_label
 
     def __str__(self):
-        return str(self.speaker + " " + self.text + " " + self.da_label)
+        return str(f"{self.speaker} {self.text} {self.da_label}")
 
 
 def process_transcript(transcript, excluded_tags=None, excluded_chars=None):
@@ -65,9 +71,7 @@ def process_transcript(transcript, excluded_tags=None, excluded_chars=None):
 
     # Create Dialogue
     conversation_id = str(transcript.utterances[0].conversation_no)
-    dialogue = Dialogue(conversation_id, len(utterances), utterances)
-
-    return dialogue
+    return Dialogue(conversation_id, len(utterances), utterances)
 
 
 def concatenate(utterances):
@@ -81,29 +85,20 @@ def concatenate(utterances):
             # Save to temp variable
             if utt.speaker == 'A':
                 # Need to check if we have multiple lines to concatenate
-                if current_a:
-                    current_a = utt.text + " " + current_a
-                else:
-                    current_a = utt.text
-
+                current_a = f"{utt.text} {current_a}" if current_a else utt.text
             elif utt.speaker == 'B':
-                if current_b:
-                    current_b = utt.text + " " + current_b
-                else:
-                    current_b = utt.text
-
+                current_b = f"{utt.text} {current_b}" if current_b else utt.text
             # And remove utterance from list
             utterances.remove(utt)
 
-        # Else if we have an utterance to concatenate
         elif current_a and utt.speaker == 'A':
             # Add it to the utterance and set temp empty
-            utt.text = utt.text + " " + current_a
+            utt.text = f"{utt.text} {current_a}"
             current_a = None
-            # print("Concatenating '", utt.text, "' + '", current_a, "'")
+                    # print("Concatenating '", utt.text, "' + '", current_a, "'")
         elif current_b and utt.speaker == 'B':
-            utt.text = utt.text + " " + current_b
+            utt.text = f"{utt.text} {current_b}"
             current_b = None
-            # print("Concatenating '", utt.text, "' + '", current_b, "'")
+                    # print("Concatenating '", utt.text, "' + '", current_b, "'")
 
     return utterances
